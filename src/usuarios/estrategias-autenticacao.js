@@ -17,7 +17,7 @@ function verificaUsuario(usuario) {
   }
 }
 
-async function verificaTokenNaBlocklist(token) {
+async function verificaTokenNaBlacklist(token) {
   const tokenNaBlocklist = await blocklist.contemToken(token);
   if (tokenNaBlocklist) {
     throw new jwt.JsonWebTokenError('Token inválido por logout!');
@@ -55,7 +55,7 @@ passport.use(
 passport.use(
   new BearerStrategy(async (token, done) => {
     try {
-      await verificaTokenNaBlocklist(token);
+      await verificaTokenNaBlacklist(token);
       const payload = jwt.verify(token, process.env.CHAVE_JWT);
       const usuario = await Usuario.buscaPorId(payload.id);
       done(null, usuario, { token });
