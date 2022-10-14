@@ -25,7 +25,7 @@ npm install
 ```
 
 > Antes de rodar o sistema para testar, é necessario criar na raiz do projeto um arquivo chamado `.env`.
-> Dentro deste arquivo você devera adicionar a `CHAVE_JWT` e o endereço da URL padrão conformer descrito abaixo:
+> Dentro deste arquivo você devera adicionar o código abaixo:
 
 ```
 CHAVE_JWT="coloque-sua-chave-secreta-aqui"
