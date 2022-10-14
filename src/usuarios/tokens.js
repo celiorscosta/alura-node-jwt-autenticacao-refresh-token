@@ -19,6 +19,8 @@ async function verificaTokenJWT(token, nome, blacklist) {
 }
 
 async function verificaTokenNaBlacklist(token, nome, blacklist) {
+    if (!blacklist) return;
+    
     const tokenNaBlacklist = await blacklist.contemToken(token);
     if (tokenNaBlacklist) {
         throw new jwt.JsonWebTokenError(`${nome} inválido por logout!`);
@@ -45,8 +47,8 @@ async function verificaTokenOpaco(token, nome, whitelist) {
 
 async function invalidaTokenOpaco(token, whitelist) {
     await whitelist.deleta(token);
-  }
-  
+}
+
 
 function verificaTokenValido(id, nome) {
     if (!id) {
@@ -87,6 +89,16 @@ module.exports = {
         },
         invalida(token) {
             return invalidaTokenOpaco(token, this.lista);
+        }
+    },
+    verificacaoEmail: {
+        nome: 'token de verificação de e-mail',
+        expiracao: [1, 'h'],
+        cria(id) {
+            return criaTokenJWT(id, this.expiracao);
+        },
+        verifica(token) {
+            return verificaTokenJWT(token, this.nome);
         }
     }
 }

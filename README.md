@@ -30,6 +30,12 @@ npm install
 ```
 CHAVE_JWT="coloque-sua-chave-secreta-aqui"
 BASE_URL="localhost:3000"
+
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_USUARIO="<seu usuário de e-mail>@gmail.com"
+EMAIL_SENHA="<sua senha>"
+
+NODE_ENV="development"
 ```
 
 > Para gerar a chave rode no seu terminal o comando:
