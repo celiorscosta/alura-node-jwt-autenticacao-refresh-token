@@ -1,24 +1,12 @@
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError } = require('../erros');
 
-const jwt = require('jsonwebtoken');
-const blacklist = require('../../redis/manipula-blocklist');
-const crypto = require('crypto');
-const moment = require('moment');
+const tokens = require('./tokens');
+const { EmailVerificacao } = require('./emails');
 
-function criaTokenJWT(usuario) {
-  const payload = {
-    id: usuario.id,
-  };
-
-  const token = jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: '15m' });
-  return token;
-}
-
-function criaTokenOpaco(usuario) {
-  const tokeOpaco = crypto.randomBytes(24).toString('hex');
-  const dataExpiracao = moment().add(5, 'd').unix();
-  return tokeOpaco;
+function geraEndereco(rota, id) {
+  const baseURL = process.env.BASE_URL;
+  return `${baseURL}${rota}${id}`;
 }
 
 module.exports = {
@@ -33,6 +21,11 @@ module.exports = {
       await usuario.adicionaSenha(senha);
       await usuario.adiciona();
 
+      const endereco = geraEndereco('usuario/verifica_email/ ', usuario.id);
+
+      const emailVerificacao = new EmailVerificacao(usuario, endereco);
+      emailVerificacao.enviaEmail().catch(console.log);
+
       res.status(201).json();
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
@@ -44,8 +37,8 @@ module.exports = {
 
   async login(req, res) {
     try {
-      const accessToken = criaTokenJWT(req.user);
-      const refreshToken = criaTokenOpaco(req.user);
+      const accessToken = tokens.access.cria(req.user.id);
+      const refreshToken = await tokens.refresh.cria(req.user.id);
 
       res.set('Authorization', accessToken);
       res.status(200).json({ refreshToken });
@@ -57,7 +50,7 @@ module.exports = {
   async logout(req, res) {
     try {
       const token = req.token;
-      await blacklist.adiciona(token);
+      await tokens.access.invalida(token);
       res.status(204).json();
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
